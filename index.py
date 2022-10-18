@@ -3,6 +3,41 @@ import feedparser
 import requests
 import time
 import configparser
+import sys
+import os
+
+# Sans Arguments
+if len(sys.argv):
+  print("Initialisation du système")
+
+  if not os.path.exists("base.db"):
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
+
+    cur.execute("CREATE TABLE podcast(rss, guid)")
+
+    print("> Base crée")
+
+  else:
+    print("> Base déjà existante, skip")
+  
+  if not os.path.exists("config.ini"):
+    config = configparser.ConfigParser()
+    config['DEFAULT'] = {
+      "DefaultMessage": ":tada: Un nouvel épisode de **__podcast__** est disponible!",
+      "Webhook": ""
+    }
+
+    with open('example.ini', 'w') as configfile:
+      config.write(configfile)
+
+    print("> Fichier de config initialisé")
+  else:
+    print("> Fichier de config déjà existant, skip")
+
+  
+  print("Travail terminé")
+  exit()
 
 config = configparser.ConfigParser()
 config.read("config.ini", encoding='utf-8')
