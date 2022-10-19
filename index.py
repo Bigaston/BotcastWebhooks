@@ -75,6 +75,15 @@ else:
     for podcast in res.fetchall():
       print("> " + podcast[0])
 
+  elif sys.argv[1] == "remove" or sys.argv[1] == "delete":
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
+
+    print("Podcast " + sys.argv[2] + " supprimé")
+
+    cur.execute("DELETE FROM podcast WHERE rss = '" + sys.argv[2] + "'")
+    con.commit()
+
   elif sys.argv[1] == "fetch":
     config = configparser.ConfigParser()
     config.read("config.ini", encoding='utf-8')
