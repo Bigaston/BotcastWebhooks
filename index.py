@@ -203,3 +203,5 @@ else:
 
     cur.execute("UPDATE podcast SET guid = ? WHERE rss = ?", ("", sys.argv[2]))
     con.commit()
+
+    print("Podcast " + sys.argv[2] + " reinitialisé")
