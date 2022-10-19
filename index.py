@@ -6,6 +6,7 @@ import sys
 import os
 
 bdd = os.path.join(os.path.dirname(os.path.realpath(__file__)), "base.db")
+configFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.ini")
 
 def get_entry_date(entry):
   return entry.get("published_parsed")
@@ -37,7 +38,7 @@ else:
     else:
       print("> Base déjà existante, skip")
     
-    if not os.path.exists("config.ini"):
+    if not os.path.exists(configFile):
       config = configparser.ConfigParser()
       config['DEFAULT'] = {
         "DefaultMessage": ":tada: Un nouvel épisode de **__podcast__** est disponible!",
@@ -113,7 +114,7 @@ else:
     print("Envoit de la notification pour " + sys.argv[2])
 
     config = configparser.ConfigParser()
-    config.read("config.ini", encoding='utf-8')
+    config.read(configFile, encoding='utf-8')
 
     feed = feedparser.parse(sys.argv[2])
 
@@ -150,7 +151,7 @@ else:
   # Récupération des données
   elif sys.argv[1] == "fetch":
     config = configparser.ConfigParser()
-    config.read("config.ini", encoding='utf-8')
+    config.read(configFile, encoding='utf-8')
 
     con = sqlite3.connect(bdd)
     cur = con.cursor()
