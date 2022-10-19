@@ -21,6 +21,7 @@ if len(sys.argv) == 1:
   print("- remove [flux]: Retire le flux de la BDD")
   print("- force [flux]: Force l'envoit de la notification pour le flux")
   print("- fetch: Vérifie tous les flux et envoit une notification si besoin")
+  print("- reset_guid [flux]: Renvoit de la notification de flux à la prochaine execution de fetch")
 else:
   if sys.argv[1] == "init" or sys.argv[1] == "setup":
     print("Initialisation du système")
@@ -192,3 +193,13 @@ else:
             "color": 0xff9100
           }]
         })
+  elif sys.argv[1] == "reset_guid":
+    if len(sys.argv) == 2:
+      print("Il manque le flux RSS!")
+      exit()
+
+    con = sqlite3.connect(bdd)
+    cur = con.cursor()
+
+    cur.execute("UPDATE podcast SET guid = ? WHERE rss = ?", ("", sys.argv[2]))
+    con.commit()
