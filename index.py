@@ -54,7 +54,7 @@ else:
   # Affichage du cron
   elif sys.argv[1] == "cron":
     print("Ajouter la ligne si dessous à la crontab de votre user avec 'crontab -e'")
-    print("*/5 * * * * /usr/local/bin/python3 " + os.getcwd() + "/index.py fetch")
+    print("*/5 * * * * /bin/python3 " + os.getcwd() + "/index.py fetch")
   # Ajout de podcast
   elif sys.argv[1] == "add":
     if len(sys.argv) == 2:
