@@ -43,6 +43,7 @@ if len(sys.argv) == 1:
   print("Travail terminé")
   exit()
 else:
+  # Ajout de podcast
   if sys.argv[1] == "add":
     if len(sys.argv) == 2:
       print("Il manque le flux RSS!")
@@ -65,6 +66,7 @@ else:
 
     print("Podcast " + sys.argv[2] + " ajouté")
   
+  # Affichage des podcasts
   elif sys.argv[1] == "list":
     con = sqlite3.connect("base.db")
     cur = con.cursor()
@@ -75,6 +77,7 @@ else:
     for podcast in res.fetchall():
       print("> " + podcast[0])
 
+  # Suppression des podcasts
   elif sys.argv[1] == "remove" or sys.argv[1] == "delete":
     con = sqlite3.connect("base.db")
     cur = con.cursor()
@@ -84,6 +87,7 @@ else:
     cur.execute("DELETE FROM podcast WHERE rss = '" + sys.argv[2] + "'")
     con.commit()
 
+  # Récupération des données
   elif sys.argv[1] == "fetch":
     config = configparser.ConfigParser()
     config.read("config.ini", encoding='utf-8')
@@ -125,6 +129,3 @@ else:
             "color": 0xff9100
           }]
         })
-
-        print(r.status_code)
-        print(r.text)
