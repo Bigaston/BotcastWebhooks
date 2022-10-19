@@ -14,39 +14,49 @@ def get_entry_date(entry):
 
 # Sans Arguments
 if len(sys.argv) == 1:
-  print("Initialisation du système")
-
-  if not os.path.exists("base.db"):
-    cur.execute("CREATE TABLE podcast(rss, guid)")
-
-    print("> Base crée")
-
-  else:
-    print("> Base déjà existante, skip")
-  
-  if not os.path.exists("config.ini"):
-    config = configparser.ConfigParser()
-    config['DEFAULT'] = {
-      "DefaultMessage": ":tada: Un nouvel épisode de **__podcast__** est disponible!",
-      "Webhook": ""
-    }
-
-    with open('example.ini', 'w') as configfile:
-      config.write(configfile)
-
-    print("> Fichier de config initialisé")
-  else:
-    print("> Fichier de config déjà existant, skip")
-  
-  print("Travail terminé")
-  exit()
+  print("BotcastPython par Bigaston (HELP)")
+  print("Liste des commandes:")
+  print("- init: Mise en place de la BDD et du fichier de config")
+  print("- cron: Vous donne la ligne à ajouter au crontab")
+  print("- add [flux]: Ajoute un flux à la BDD")
+  print("- list: Liste tous les podcast")
+  print("- remove [flux]: Retire le flux de la BDD")
+  print("- force [flux]: Force l'envoit de la notification pour le flux")
+  print("- fetch: Vérifie tous les flux et envoit une notification si besoin")
 else:
+  if sys.argv[1] == "init" or sys.argv[1] == "setup":
+    print("Initialisation du système")
+
+    if not os.path.exists("base.db"):
+      cur.execute("CREATE TABLE podcast(rss, guid)")
+
+      print("> Base crée")
+
+    else:
+      print("> Base déjà existante, skip")
+    
+    if not os.path.exists("config.ini"):
+      config = configparser.ConfigParser()
+      config['DEFAULT'] = {
+        "DefaultMessage": ":tada: Un nouvel épisode de **__podcast__** est disponible!",
+        "Webhook": ""
+      }
+
+      with open('example.ini', 'w') as configfile:
+        config.write(configfile)
+
+      print("> Fichier de config initialisé")
+    else:
+      print("> Fichier de config déjà existant, skip")
+    
+    print("Travail terminé. Pensez à modifier config.ini pour coller le bon webhook")
+    exit()
   # Affichage du cron
-  if sys.argv[1] == "cron":
+  elif sys.argv[1] == "cron":
     print("Ajouter la ligne si dessous à la crontab de votre user avec 'crontab -e'")
     print("*/5 * * * * /usr/local/bin/python3 " + os.getcwd() + "/index.py fetch")
   # Ajout de podcast
-  if sys.argv[1] == "add":
+  elif sys.argv[1] == "add":
     if len(sys.argv) == 2:
       print("Il manque le flux RSS!")
       exit()
