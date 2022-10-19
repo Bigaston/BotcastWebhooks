@@ -42,7 +42,7 @@ else:
         "Webhook": ""
       }
 
-      with open('example.ini', 'w') as configfile:
+      with open('config.ini', 'w') as configfile:
         config.write(configfile)
 
       print("> Fichier de config initialisé")
