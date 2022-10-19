@@ -6,9 +6,6 @@ import configparser
 import sys
 import os
 
-con = sqlite3.connect("base.db")
-cur = con.cursor()
-
 def get_entry_date(entry):
   return entry.get("published_parsed")
 
@@ -28,6 +25,9 @@ else:
     print("Initialisation du système")
 
     if not os.path.exists("base.db"):
+      con = sqlite3.connect("base.db")
+      cur = con.cursor()
+
       cur.execute("CREATE TABLE podcast(rss, guid)")
 
       print("> Base crée")
@@ -70,6 +70,9 @@ else:
       print("Erreur: Pas d'épisode dans le flux!")
       exit()
 
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
+
     cur.execute("INSERT INTO podcast VALUES(?, ?)", (sys.argv[2], entries[0].guid))
     con.commit()
 
@@ -77,6 +80,9 @@ else:
   
   # Affichage des podcasts
   elif sys.argv[1] == "list":
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
+
     res = cur.execute("SELECT * FROM podcast")
 
     print("Liste des podcasts")
@@ -90,6 +96,9 @@ else:
       exit()
 
     print("Podcast " + sys.argv[2] + " supprimé")
+
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
 
     cur.execute("DELETE FROM podcast WHERE rss = ?", (sys.argv[2],))
     con.commit()
@@ -109,6 +118,9 @@ else:
     entries = feed.entries
     entries.sort(reverse=True, key=get_entry_date)
     
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
+
     cur.execute("UPDATE podcast SET guid = ? WHERE rss = ?", (entries[0].guid, sys.argv[2]))
     con.commit()
 
@@ -138,6 +150,9 @@ else:
     config = configparser.ConfigParser()
     config.read("config.ini", encoding='utf-8')
 
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
+
     res = cur.execute("SELECT * FROM podcast")
 
     print("Fetch des flux")
@@ -151,6 +166,7 @@ else:
       if entries[0].guid != podcast[1]:
         print("> Envoit du dernier épisode de " + feed.feed.title)
         # Changement du GUID
+
         cur.execute("UPDATE podcast SET guid = ? WHERE rss = ?", (entries[0].guid, podcast[0]))
         con.commit()
 
