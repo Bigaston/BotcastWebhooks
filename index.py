@@ -1,10 +1,11 @@
 import sqlite3
 import feedparser
 import requests
-import time
 import configparser
 import sys
 import os
+
+bdd = os.path.join(os.path.dirname(os.path.realpath(__file__)), "base.db")
 
 def get_entry_date(entry):
   return entry.get("published_parsed")
@@ -24,8 +25,8 @@ else:
   if sys.argv[1] == "init" or sys.argv[1] == "setup":
     print("Initialisation du système")
 
-    if not os.path.exists("base.db"):
-      con = sqlite3.connect("base.db")
+    if not os.path.exists(bdd):
+      con = sqlite3.connect(bdd)
       cur = con.cursor()
 
       cur.execute("CREATE TABLE podcast(rss, guid)")
@@ -70,7 +71,7 @@ else:
       print("Erreur: Pas d'épisode dans le flux!")
       exit()
 
-    con = sqlite3.connect("base.db")
+    con = sqlite3.connect(bdd)
     cur = con.cursor()
 
     cur.execute("INSERT INTO podcast VALUES(?, ?)", (sys.argv[2], entries[0].guid))
@@ -80,7 +81,7 @@ else:
   
   # Affichage des podcasts
   elif sys.argv[1] == "list":
-    con = sqlite3.connect("base.db")
+    con = sqlite3.connect(bdd)
     cur = con.cursor()
 
     res = cur.execute("SELECT * FROM podcast")
@@ -97,7 +98,7 @@ else:
 
     print("Podcast " + sys.argv[2] + " supprimé")
 
-    con = sqlite3.connect("base.db")
+    con = sqlite3.connect(bdd)
     cur = con.cursor()
 
     cur.execute("DELETE FROM podcast WHERE rss = ?", (sys.argv[2],))
@@ -118,7 +119,7 @@ else:
     entries = feed.entries
     entries.sort(reverse=True, key=get_entry_date)
     
-    con = sqlite3.connect("base.db")
+    con = sqlite3.connect(bdd)
     cur = con.cursor()
 
     cur.execute("UPDATE podcast SET guid = ? WHERE rss = ?", (entries[0].guid, sys.argv[2]))
@@ -150,7 +151,7 @@ else:
     config = configparser.ConfigParser()
     config.read("config.ini", encoding='utf-8')
 
-    con = sqlite3.connect("base.db")
+    con = sqlite3.connect(bdd)
     cur = con.cursor()
 
     res = cur.execute("SELECT * FROM podcast")
