@@ -37,11 +37,14 @@ if len(sys.argv) == 1:
     print("> Fichier de config initialisé")
   else:
     print("> Fichier de config déjà existant, skip")
-
   
   print("Travail terminé")
   exit()
 else:
+  # Affichage du cron
+  if sys.argv[1] == "cron":
+    print("Ajouter la ligne si dessous à la crontab de votre user avec 'crontab -e'")
+    print("*/5 * * * * /usr/local/bin/python3 " + os.getcwd() + "/index.py fetch")
   # Ajout de podcast
   if sys.argv[1] == "add":
     if len(sys.argv) == 2:
@@ -127,6 +130,8 @@ else:
 
     res = cur.execute("SELECT * FROM podcast")
 
+    print("Fetch des flux")
+
     for podcast in res.fetchall():
       feed = feedparser.parse(podcast[0])
 
@@ -134,6 +139,7 @@ else:
       entries.sort(reverse=True, key=get_entry_date)
 
       if entries[0].guid != podcast[1]:
+        print("> Envoit du dernier épisode de " + feed.feed.title)
         # Changement du GUID
         cur.execute("UPDATE podcast SET guid = ? WHERE rss = ?", (entries[0].guid, podcast[0]))
         con.commit()
