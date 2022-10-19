@@ -6,8 +6,12 @@ import configparser
 import sys
 import os
 
+
+def get_entry_date(entry):
+  return entry.get("published_parsed")
+
 # Sans Arguments
-if len(sys.argv):
+if len(sys.argv) == 1:
   print("Initialisation du système")
 
   if not os.path.exists("base.db"):
@@ -38,58 +42,80 @@ if len(sys.argv):
   
   print("Travail terminé")
   exit()
+else:
+  if sys.argv[1] == "add":
+    if len(sys.argv) == 2:
+      print("Il manque le flux RSS!")
+      exit()
 
-config = configparser.ConfigParser()
-config.read("config.ini", encoding='utf-8')
+    feed = feedparser.parse(sys.argv[2])
 
-con = sqlite3.connect("base.db")
-cur = con.cursor()
+    entries = feed.entries
+    entries.sort(reverse=True, key=get_entry_date)
 
-res = cur.execute("SELECT * FROM podcast")
+    if len(entries) == 0:
+      print("Erreur: Pas d'épisode dans le flux!")
+      exit()
 
-def get_entry_date(entry):
-  return entry.get("published_parsed")
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
 
-for podcast in res.fetchall():
-  feed = feedparser.parse(podcast[0])
-
-  entries = feed.entries
-  entries.sort(reverse=True, key=get_entry_date)
-
-
-
-  if entries[0].guid != podcast[1]:
-    # Changement du GUID
-    cur.execute("UPDATE podcast SET guid = ? WHERE rss = ?", (entries[0].guid, podcast[0]))
+    cur.execute("INSERT INTO podcast VALUES('" + sys.argv[2] + "', '" + entries[0].guid + "')")
     con.commit()
 
-    print(entries[0])
+    print("Podcast " + sys.argv[2] + " ajouté")
+  
+  elif sys.argv[1] == "list":
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
 
-    print(time.mktime(entries[0].published_parsed))
+    res = cur.execute("SELECT * FROM podcast")
 
-    print(entries[0].published_parsed)
+    print("Liste des podcasts")
+    for podcast in res.fetchall():
+      print("> " + podcast[0])
 
-    r = requests.post(config["DEFAULT"]["Webhook"], json={
-      "content": config["DEFAULT"]["DefaultMessage"].replace("__podcast__", feed.feed.title), 
-      "embeds": [{
-        "title": entries[0].title,
-        "description": entries[0].content[0].value[0:4095],
-        "url": entries[0].links[0].href,
-        "thumbnail": {
-          "url": entries[0].image.href
-        },
-        "fields": [{
-          "name": ":headphones:",
-          "value": "[Ecouter l'épisode](" + entries[0].links[0].href + ")",
-          "inline": True
-        }, {
-          "name": ":link:",
-          "value": "[Visiter le site du podcast](" + feed.feed.link + ")",
-          "inline": True
-        }],
-        "color": 0xff9100
-      }]
-    })
+  elif sys.argv[1] == "fetch":
+    config = configparser.ConfigParser()
+    config.read("config.ini", encoding='utf-8')
 
-    print(r.status_code)
-    print(r.text)
+    con = sqlite3.connect("base.db")
+    cur = con.cursor()
+
+    res = cur.execute("SELECT * FROM podcast")
+
+    for podcast in res.fetchall():
+      feed = feedparser.parse(podcast[0])
+
+      entries = feed.entries
+      entries.sort(reverse=True, key=get_entry_date)
+
+      if entries[0].guid != podcast[1]:
+        # Changement du GUID
+        cur.execute("UPDATE podcast SET guid = ? WHERE rss = ?", (entries[0].guid, podcast[0]))
+        con.commit()
+
+        r = requests.post(config["DEFAULT"]["Webhook"], json={
+          "content": config["DEFAULT"]["DefaultMessage"].replace("__podcast__", feed.feed.title), 
+          "embeds": [{
+            "title": entries[0].title,
+            "description": entries[0].content[0].value[0:4095],
+            "url": entries[0].links[0].href,
+            "thumbnail": {
+              "url": entries[0].image.href
+            },
+            "fields": [{
+              "name": ":headphones:",
+              "value": "[Ecouter l'épisode](" + entries[0].links[0].href + ")",
+              "inline": True
+            }, {
+              "name": ":link:",
+              "value": "[Visiter le site du podcast](" + feed.feed.link + ")",
+              "inline": True
+            }],
+            "color": 0xff9100
+          }]
+        })
+
+        print(r.status_code)
+        print(r.text)
